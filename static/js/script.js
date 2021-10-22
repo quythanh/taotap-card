@@ -1,15 +1,15 @@
 const toDataURL = url =>
     fetch(url)
-        .then(response => response.blob())
-        .then(
-            blob =>
-                new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                })
-        );
+    .then(response => response.blob())
+    .then(
+        blob =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        })
+    );
 
 const readFile = file => {
     return new Promise((resolve, reject) => {
@@ -51,11 +51,10 @@ const app = new Vue({
     delimiters: ['[[', ']]'],
     data: {
         showLogo: true,
-        logo:
-            "https://cdn.glitch.com/d08bb326-e251-4744-9266-f454d653c7c1%2Fwhite-logo.png?v=1624366965601",
+        logo: "https://cdn.glitch.com/d08bb326-e251-4744-9266-f454d653c7c1%2Fwhite-logo.png?v=1624366965601",
         logoSize: 250,
 
-        url: "https://t.quythanh.repl.co/resume/",
+        url: "https://quythanh.github.io",
         qrCode: undefined,
         qrSize: 195,
 
@@ -112,7 +111,7 @@ const app = new Vue({
                 height: this.qrSize
             });
         },
-        exportCard: async () => {
+        exportCard: async() => {
             await domtoimage.toPng(document.querySelector("#card")); // Lol font only work in 2nd times
             const dataUrl = await domtoimage.toPng(document.querySelector("#card"));
 
@@ -125,7 +124,7 @@ const app = new Vue({
             link.href = dataUrl;
             link.click();
         },
-        exportPDF: async () => {
+        exportPDF: async() => {
             const { jsPDF } = window.jspdf;
 
             await domtoimage.toPng(document.querySelector("#card")); // Lol font only work in 2nd times

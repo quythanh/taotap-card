@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://quythanh.github.io/static/css/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="shortcut icon" type="image/jpg" href="https://cdn.glitch.com/d08bb326-e251-4744-9266-f454d653c7c1%2Ffavicon.png?v=1624373448629" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Import the webpage's stylesheet -->
+    <link rel="stylesheet" href="./static/css/font.css" />
+    <link rel="stylesheet" href="./static/css/style.css" />
+    <title>Taotap Card</title>
+</head>
+
+<body>
+    <div class="container">
+        <div id="app">
+            <div id="card" v-bind:style="{ 'background-image': 'url(' + background + ')' }">
+                <div id="overlay"></div>
+                <img v-if="showLogo" v-bind:src="logo" v-bind:style="{ 'width': logoSize + 'px' }" id="logo" />
+
+                <div id="qr-code"></div>
+
+                <p id="name">
+                    <span v-bind:style="{ 'font-size': fontSize + 'px', 'font-family': font }" id="name-content">[[name]]</span>
+                    <span class="hack">_</span>
+                </p>
+            </div>
+
+            <div id="form-card">
+                <div class="row">
+                    <h5>1. Logo</h5>
+                    <div>
+                        <label>Đổi logo (Ảnh PNG trong suốt, size &gt; 250px) </label>
+                        <div class="input-group mb-3">
+                            <input class="form-control" aria-describedby="LogoInput" aria-label="Upload" id="inputGroupFile03" type="file" @change="changeLogo" accept="image/*" />
+                            <button v-if="showLogo" class="btn btn-outline-primary" v-on:click="showLogo = !showLogo" id="LogoInput">
+                                Ẩn Logo
+                            </button>
+                            <button v-else class="btn btn-outline-primary" v-on:click="showLogo = !showLogo" id="LogoInput">
+                                Hiện Logo
+                            </button>
+                            <button class="btn btn-outline-primary" v-on:click="logoSize -= 10" id="LogoInput">
+                                - Thu nhỏ
+                            </button>
+                            <button class="btn btn-outline-primary" v-on:click="logoSize += 10" id="LogoInput">
+                                + Phóng to
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <h5>
+                        2. QR Code (Dùng
+                        <a href="https://linktr.ee" target="_blank">linktree</a> hoặc
+                        <a href="https://instabio.cc" target="_blank">instabio</a> hoặc web tự code)
+                    </h5>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="qrcodeInput">URL</span>
+                        <input v-model="url" placeholder="URL" id="url" type="text" class="form-control" aria-describedby="qrcodeInput" />
+                        <button class="btn btn-outline-primary" v-on:click="updateQR(-10)" id="qrcodeInput">
+                            - Thu nhỏ
+                        </button>
+                        <button class="btn btn-outline-primary" v-on:click="updateQR(10)" id="qrcodeInput">
+                            + Phóng to
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <h5>3. Ảnh nền</h5>
+                    <div id="background-select">
+                        <div id="img_background" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div v-for="(bg, index) in backgrounds" class="carousel-item" :class="{ 'active' : index === 0 }">
+                                    <img :src="[[bg]]" v-on:click="setBackground([[bg]])" />
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#img_background" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#img_background" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                    <label>Đổi ảnh nền (Ảnh tỷ lệ 11:7, size &gt; 1100px X 700px) </label>
+                    <div class="input-group mb-3">
+                        <input class="form-control" aria-describedby="inputGroupFileAddon03" aria-label="Upload" type="file" @change="changeCustomBg" accept="image/*" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <h5>4. Thông tin thẻ (Tên dài quá có thể thu nhỏ chữ)</h5>
+                    <div class="input-group mb-3">
+                        <input v-model="name" placeholder="Tên trên thẻ" id="txt-name" type="text" class="form-control" aria-describedby="Font" />
+                        <label class="input-group-text" for="Font">Font</label>
+                        <select v-model="font" class="form-select" id="Font">
+                            <option v-for="fnt in fonts" :value="fnt">[[fnt]]</option>
+                        </select>
+                        <button class="btn btn-outline-primary" v-on:click="fontSize -= 2" id="Font">
+                            - Thu nhỏ
+                        </button>
+                        <button class="btn btn-outline-primary" v-on:click="fontSize += 2" id="Font">
+                            + Phóng to
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5>5. Xuất file</h5>
+                        <button class="btn btn-outline-primary" v-on:click="exportCard">
+                            Tạo thẻ (Ảnh)
+                        </button>
+                        <button class="btn btn-outline-primary" v-on:click="exportPDF">
+                            Tạo thẻ (PDF)
+                        </button>
+
+                        <p>
+                            Nếu xuất file ảnh, các bạn in màu với <b>độ phân giải 300dpi</b> sẽ được ảnh <b>tầm 8.7cm x 5.5cm</b>. <br /> Nếu xuất file PDF thì đem đi màu A4, chọn <b>Fit to Paper</b> khi in là ok. <br /> Dán ảnh này lên thẻ NFC trắng
+                            <b>(8.55cm X 5.4cm)</b> là được nhé!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js" integrity="sha512-VKjwFVu/mmKGk0Z0BxgDzmn10e590qk3ou/jkmRugAkSTMSIRkd4nEnk+n7r5WBbJquusQEQjBidrBD3IQQISQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.js" integrity="sha512-is1ls2rgwpFZyixqKFEExPHVUUL+pPkBEPw47s/6NDQ4n1m6T/ySeDW3p54jp45z2EJ0RSOgilqee1WhtelXfA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js" integrity="sha512-01CJ9/g7e8cUmY0DFTMcUw/ikS799FHiOA0eyHsUWfOetgbx/t6oV4otQ5zXKQyIrQGTHSmRVPIgrgLcZi/WMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://quythanh.github.io/static/js/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="https://quythanh.github.io/static/js/vuejs/vue.js"></script>
+    <script src="./static/js/script.js" defer></script>
+</body>
+
+</html>
